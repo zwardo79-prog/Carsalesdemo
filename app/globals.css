@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 22% 6%;
+    --foreground: 210 20% 96%;
+    --card: 222 20% 8%;
+    --card-foreground: 210 20% 96%;
+    --popover: 222 22% 7%;
+    --popover-foreground: 210 20% 96%;
+    --primary: 158 84% 52%;
+    --primary-foreground: 222 40% 6%;
+    --secondary: 222 18% 14%;
+    --secondary-foreground: 210 20% 96%;
+    --muted: 222 18% 12%;
+    --muted-foreground: 215 16% 60%;
+    --accent: 198 90% 48%;
+    --accent-foreground: 222 40% 6%;
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 222 16% 18%;
+    --input: 222 16% 18%;
+    --ring: 158 84% 52%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out both;
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scale-in 0.25s ease-out both;
+}
+
+@media print {
+  body { background: white !important; }
+  .print\:hidden { display: none !important; }
+}
