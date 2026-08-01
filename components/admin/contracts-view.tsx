@@ -90,8 +90,8 @@ export function ContractsView({ loans, customers, vehicles, payments, loading }:
               </div>
             </div>
             <div className="text-right text-xs text-slate-500">
-              <p>1234 Autobahn Drive</p>
-              <p>Springfield, USA</p>
+              <p>1234 Moi Avenue</p>
+              <p>Nakuru, Kenya</p>
               <p>contact@sakinyamotors.com</p>
             </div>
           </div>
