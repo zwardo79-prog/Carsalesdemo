@@ -25,6 +25,14 @@ import {
 } from '@/components/ui/dialog';
 import { Landmark, Plus, User, Car, Calendar, Wallet } from 'lucide-react';
 
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      [elemName: string]: any;
+    }
+  }
+}
+
 type Props = {
   loans: Loan[];
   customers: Customer[];
