@@ -149,22 +149,22 @@ export function LoansView({ loans, customers, vehicles, payments, loading, onCha
                   </Badge>
                 </div>
 
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-2">
                   <div>
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Vehicle Price</p>
-                    <p className="text-sm font-semibold">{formatCurrency(Number(l.vehicle_price))}</p>
+                    <p className="text-xs font-semibold break-words">{formatCurrency(Number(l.vehicle_price))}</p>
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Deposit</p>
-                    <p className="text-sm font-semibold">{formatCurrency(Number(l.deposit))}</p>
+                    <p className="text-xs font-semibold">{formatCurrency(Number(l.deposit))}</p>
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Monthly</p>
-                    <p className="text-sm font-semibold text-primary">{formatCurrency(Number(l.monthly_payment))}</p>
+                    <p className="text-xs font-semibold text-primary">{formatCurrency(Number(l.monthly_payment))}</p>
                   </div>
                   <div>
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</p>
-                    <p className="text-sm font-semibold">{formatCurrency(Number(l.remaining_balance))}</p>
+                    <p className="text-xs font-semibold">{formatCurrency(Number(l.remaining_balance))}</p>
                   </div>
                 </div>
 
