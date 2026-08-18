@@ -5,6 +5,9 @@ export type Customer = {
   phone: string | null;
   address: string | null;
   id_number: string | null;
+  logbook_url?: string | null;
+  id_document_url?: string | null;
+  agreement_url?: string | null;
   created_at: string;
 };
 
