@@ -8,6 +8,7 @@ import {
   Landmark,
   CreditCard,
   FileText,
+  Receipt,
   Menu,
   X,
 } from 'lucide-react';
@@ -19,7 +20,8 @@ export type View =
   | 'vehicles'
   | 'loans'
   | 'payments'
-  | 'contracts';
+  | 'contracts'
+  | 'receipts';
 
 const NAV: {
   id: View;
@@ -32,6 +34,7 @@ const NAV: {
   { id: 'loans', label: 'Loans', icon: Landmark },
   { id: 'payments', label: 'Payments', icon: CreditCard },
   { id: 'contracts', label: 'Contracts', icon: FileText },
+  { id: 'receipts', label: 'Receipts', icon: Receipt },
 ];
 
 export function Sidebar({

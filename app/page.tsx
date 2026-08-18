@@ -10,6 +10,7 @@ import { VehiclesView } from '@/components/admin/vehicles-view';
 import { LoansView } from '@/components/admin/loans-view';
 import { PaymentsView } from '@/components/admin/payments-view';
 import { ContractsView } from '@/components/admin/contracts-view';
+import { ReceiptsView } from '@/components/admin/receipts-view';
 
 export default function AdminPage() {
   const [view, setView] = useState<View>('dashboard');
@@ -19,6 +20,7 @@ export default function AdminPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [balanceItems, setBalanceItems] = useState<BalanceItem[]>([]);
+  const [receiptPaymentId, setReceiptPaymentId] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,10 +92,21 @@ export default function AdminPage() {
             <LoansView loans={loans} customers={customers} vehicles={vehicles} payments={payments} loading={loading} onChanged={refresh} />
           )}
           {view === 'payments' && (
-            <PaymentsView loans={loans} customers={customers} vehicles={vehicles} payments={payments} loading={loading} onChanged={refresh} />
+            <PaymentsView
+              loans={loans}
+              customers={customers}
+              vehicles={vehicles}
+              payments={payments}
+              loading={loading}
+              onChanged={refresh}
+              onPrintReceipt={(paymentId) => { setReceiptPaymentId(paymentId); setView('receipts'); }}
+            />
           )}
           {view === 'contracts' && (
             <ContractsView loans={loans} customers={customers} vehicles={vehicles} payments={payments} balanceItems={balanceItems} loading={loading} />
+          )}
+          {view === 'receipts' && (
+            <ReceiptsView loans={loans} customers={customers} vehicles={vehicles} payments={payments} loading={loading} initialPaymentId={receiptPaymentId} />
           )}
         </div>
       </main>

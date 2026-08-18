@@ -24,7 +24,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { CreditCard, Plus, TrendingDown, Receipt } from 'lucide-react';
+import { CreditCard, Plus, TrendingDown, Receipt, Printer } from 'lucide-react';
+import { View } from '@/components/admin/sidebar';
 
 type Props = {
   loans: Loan[];
@@ -33,9 +34,10 @@ type Props = {
   payments: Payment[];
   loading: boolean;
   onChanged: () => void;
+  onPrintReceipt: (paymentId: string) => void;
 };
 
-export function PaymentsView({ loans, customers, vehicles, payments, loading, onChanged }: Props) {
+export function PaymentsView({ loans, customers, vehicles, payments, loading, onChanged, onPrintReceipt }: Props) {
   const [open, setOpen] = useState(false);
   const [selectedLoanId, setSelectedLoanId] = useState('');
   const [amount, setAmount] = useState('');
@@ -159,7 +161,12 @@ export function PaymentsView({ loans, customers, vehicles, payments, loading, on
                             <span className="text-muted-foreground">· {formatDate(p.payment_date)}</span>
                             {p.note && <Badge variant="outline" className="text-[10px]">{p.note}</Badge>}
                           </div>
-                          <span className="text-xs text-muted-foreground">Bal: {formatCurrency(Number(p.remaining_after))}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-muted-foreground">Bal: {formatCurrency(Number(p.remaining_after))}</span>
+                            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => onPrintReceipt(p.id)}>
+                              <Printer className="mr-1 h-3.5 w-3.5" /> Receipt
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
