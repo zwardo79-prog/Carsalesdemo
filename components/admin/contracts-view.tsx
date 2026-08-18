@@ -48,68 +48,67 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
   const handlePrint = () => window.print();
 
   const specRow = (label: string, value: string | number | null | undefined) => (
-    <div className="flex text-sm">
-      <span className="w-40 shrink-0 font-semibold">
+    <div className="flex text-[10px]">
+      <span className="w-32 shrink-0 font-semibold text-black">
         <span className="mr-1 text-red-600">&#10070;</span>{label}
       </span>
-      <span>: {value ?? ''}</span>
+      <span className="text-black">: {value ?? ''}</span>
     </div>
   );
 
   return (
     <div className="space-y-6">
-      <style jsx global>{`
+      <style>{`
         @media print {
+          /* 1. Reset standard page dimensions and margins */
           @page {
-            margin: 12mm;
-            size: auto;
+            size: A4 portrait;
+            margin: 5mm;
           }
 
-          /* Force body and root containers to plain white with no outline/borders */
+          /* 2. Hide EVERYTHING on the DOM by default */
+          body * {
+            visibility: hidden !important;
+          }
+
+          /* 3. Make ONLY the contract container visible and reset background */
+          #contract-print-node,
+          #contract-print-node * {
+            visibility: visible !important;
+          }
+
+          /* 4. Position contract at top-left to overwrite parent layout borders */
+          #contract-print-node {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+
+          /* Force light background and clean white page */
           html, body {
             background: #ffffff !important;
             background-color: #ffffff !important;
-            color: #000000 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
           }
 
-          /* Target all UI overlays, sidebars, fixed buttons, and icons outside the contract */
-          body > *:not(#print-contract-area),
-          .print\\:hidden,
-          button,
-          nav,
-          aside,
-          header,
-          [class*="fixed"],
-          [class*="sticky"],
-          [class*="absolute"] {
-            display: none !important;
-          }
-
-          /* Ensure the contract container fills naturally without border outlines */
-          .printable-card {
+          /* Eliminate card borders and outlines */
+          .printable-card-body {
             border: none !important;
-            outline: none !important;
             box-shadow: none !important;
-            background: transparent !important;
             padding: 0 !important;
             margin: 0 !important;
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-
-          /* Fix overlapping and force sections to flow across pages */
-          ol, .grid, p, div {
-            page-break-inside: auto;
+            background: #ffffff !important;
           }
         }
       `}</style>
 
-      {/* Control Header */}
+      {/* Screen Controls */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Contracts</h1>
@@ -147,27 +146,27 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
           <p className="mt-1 text-sm text-muted-foreground">Choose a loan from the dropdown above.</p>
         </Card>
       ) : (
-        <div id="print-contract-area">
-          <Card className="printable-card mx-auto max-w-3xl border-border/60 bg-white p-8 text-black">
-            {/* Letterhead */}
+        <div id="contract-print-node">
+          <div className="printable-card-body mx-auto max-w-3xl rounded-lg border border-border/60 bg-white p-6 text-black">
+            {/* Header */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-md border-2 border-blue-800">
-                  <CarIcon className="h-8 w-8 text-blue-800" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-blue-800">
+                  <CarIcon className="h-6 w-6 text-blue-800" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-extrabold italic text-red-600">SAKINYA MOTORS</h2>
-                  <p className="text-xs italic font-semibold text-red-600">&quot;YOUR ULTIMATE DRIVING SOLUTION &quot;</p>
+                  <h2 className="text-xl font-extrabold italic text-red-600">SAKINYA MOTORS</h2>
+                  <p className="text-[9px] italic font-semibold text-red-600">&quot;YOUR ULTIMATE DRIVING SOLUTION &quot;</p>
                 </div>
               </div>
             </div>
 
-            <p className="mt-2 text-center text-sm font-semibold text-red-600">
+            <p className="mt-1 text-center text-[10px] font-semibold text-red-600">
               Dealers in: New and Clean Second hand Motor Vehicles and We also do Trade in
             </p>
 
-            <div className="mt-2 border-t-2 border-red-600 pt-2">
-              <div className="grid grid-cols-3 gap-2 text-[11px] font-medium">
+            <div className="mt-1 border-t-2 border-red-600 pt-1">
+              <div className="grid grid-cols-3 gap-2 text-[9px] font-medium text-black">
                 <div>
                   <p>Along Oginga Odinga Rd.</p>
                   <p>Evans Hospital roundabout opp.</p>
@@ -184,15 +183,15 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
                 </div>
               </div>
             </div>
-            <div className="mt-2 border-t-2 border-red-600" />
+            <div className="mt-1 border-t-2 border-red-600" />
 
             {/* Document Title */}
-            <p className="mt-4 text-sm font-bold underline">
+            <p className="mt-2 text-xs font-bold underline text-black">
               MOTOR VEHICLE SALE AGREEMENT {formatDateDMY(loan.contract_date)}
             </p>
 
-            {/* Vehicle specs */}
-            <div className="mt-3 space-y-0.5">
+            {/* Specs */}
+            <div className="mt-1.5 space-y-0.5">
               {specRow('MAKE', vehicle ? `${vehicle.make} ${vehicle.model}` : '')}
               {specRow('REG NO', vehicle?.reg_no)}
               {specRow('CHASSIS NO', vehicle?.chassis_no)}
@@ -204,7 +203,7 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
             </div>
 
             {/* Buyer Details */}
-            <div className="mt-3 space-y-0.5 text-sm">
+            <div className="mt-1.5 space-y-0.5 text-[10px] text-black">
               <p>
                 <span className="font-semibold">- BUYER &#39;S NAME: {customer?.name?.toUpperCase() ?? ''}</span>
                 <span className="ml-6">IDNO; {customer?.id_number ?? ''}</span>
@@ -218,8 +217,8 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
               </p>
             </div>
 
-            {/* Deposit & Balance Schedule */}
-            <div className="mt-3 space-y-1 text-sm">
+            {/* Payment Schedule */}
+            <div className="mt-1.5 space-y-0.5 text-[10px] text-black">
               <p>
                 <span className="font-semibold underline">DEPOSIT</span>
                 <span className="ml-6 font-semibold underline">
@@ -243,8 +242,8 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
               )}
             </div>
 
-            {/* Terms & Conditions */}
-            <ol className="mt-4 list-none space-y-1 text-[11px] leading-snug">
+            {/* Terms List */}
+            <ol className="mt-2 list-none space-y-0.5 text-[9px] leading-tight text-black">
               {TERMS.map((t, i) => (
                 <li key={i}>
                   {i + 1}. {t}
@@ -256,32 +255,32 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
             </ol>
 
             {/* Signatures */}
-            <div className="mt-8 grid grid-cols-2 gap-8 text-sm">
+            <div className="mt-4 grid grid-cols-2 gap-8 text-[10px]">
               <div>
                 <p className="font-bold text-red-600">SELLER: SAKINYA MOTORS</p>
-                <p className="mt-6">SIGN………………………</p>
-                <p className="mt-3">DATE:{formatDateDMY(loan.contract_date)}</p>
+                <p className="mt-4 text-black">SIGN………………………</p>
+                <p className="mt-1 text-black">DATE:{formatDateDMY(loan.contract_date)}</p>
               </div>
               <div>
                 <p className="font-bold text-blue-800">BUYER: {customer?.name?.toUpperCase() ?? ''}</p>
-                <p className="mt-6">SIGN……………</p>
-                <p className="mt-3">DATE: {formatDateDMY(loan.contract_date)}</p>
+                <p className="mt-4 text-black">SIGN……………</p>
+                <p className="mt-1 text-black">DATE: {formatDateDMY(loan.contract_date)}</p>
               </div>
             </div>
 
-            {/* Witness Details */}
-            <div className="mt-4 text-center text-sm">
+            {/* Witness Block */}
+            <div className="mt-2 text-center text-[10px] text-black">
               <p>
                 WITNESS: {loan.witness_name?.toUpperCase() ?? ''} &nbsp; IDNO: {loan.witness_id_number ?? ''}
               </p>
               <p>TEL NO: {loan.witness_phone ?? ''} &nbsp; SIGN………………</p>
             </div>
 
-            <div className="mt-4 border-t-2 border-blue-800" />
-            <p className="mt-2 text-center text-sm font-semibold text-red-600">
+            <div className="mt-2 border-t-2 border-blue-800" />
+            <p className="mt-1 text-center text-[10px] font-semibold text-red-600">
               Kindly quote our reference when replying
             </p>
-          </Card>
+          </div>
         </div>
       )}
     </div>
