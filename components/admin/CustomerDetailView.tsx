@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { Customer, Loan, Payment } from '@/lib/types';
 import { formatKsh, formatDateDMY } from '@/lib/finance';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
