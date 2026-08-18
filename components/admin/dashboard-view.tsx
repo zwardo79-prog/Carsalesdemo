@@ -30,10 +30,39 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
   const recentPayments = payments.slice(0, 5);
 
   const cards = [
-    { label: 'Total Customers', value: stats?.totalCustomers ?? 0, icon: Users, tint: 'text-sky-400', bg: 'bg-sky-500/10' },
-    { label: 'Total Vehicles', value: stats?.totalVehicles ?? 0, icon: Car, tint: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-    { label: 'Active Loans', value: stats?.activeLoans ?? 0, icon: Landmark, tint: 'text-amber-400', bg: 'bg-amber-500/10' },
-    { label: 'Outstanding Balance', value: formatCurrency(stats?.outstandingBalance ?? 0), icon: Wallet, tint: 'text-primary', bg: 'bg-primary/10' },
+    { 
+      label: 'Total Customers', 
+      value: stats?.totalCustomers ?? 0, 
+      icon: Users, 
+      tint: 'text-sky-400', 
+      bg: 'bg-sky-500/10',
+      // Navigates directly to customer view when clicking this stat card
+      onClick: () => onNavigate('customers') 
+    },
+    { 
+      label: 'Total Vehicles', 
+      value: stats?.totalVehicles ?? 0, 
+      icon: Car, 
+      tint: 'text-emerald-400', 
+      bg: 'bg-emerald-500/10',
+      onClick: () => onNavigate('vehicles')
+    },
+    { 
+      label: 'Active Loans', 
+      value: stats?.activeLoans ?? 0, 
+      icon: Landmark, 
+      tint: 'text-amber-400', 
+      bg: 'bg-amber-500/10',
+      onClick: () => onNavigate('loans')
+    },
+    { 
+      label: 'Outstanding Balance', 
+      value: formatCurrency(stats?.outstandingBalance ?? 0), 
+      icon: Wallet, 
+      tint: 'text-primary', 
+      bg: 'bg-primary/10',
+      onClick: () => onNavigate('loans')
+    },
   ];
 
   return (
@@ -43,9 +72,14 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
         <p className="text-sm text-muted-foreground">Overview of your dealership financing operations.</p>
       </div>
 
+      {/* STATS CARDS */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <Card key={c.label} className="relative overflow-hidden border-border/50 bg-card/50 p-5">
+          <Card 
+            key={c.label} 
+            onClick={c.onClick}
+            className="relative overflow-hidden border-border/50 bg-card/50 p-5 cursor-pointer hover:border-border transition-colors"
+          >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">{c.label}</p>
@@ -60,6 +94,7 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {/* RECENT LOANS CARD */}
         <Card className="border-border/50 bg-card/50 p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold">Recent Loans</h2>
@@ -74,7 +109,11 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
           ) : (
             <div className="space-y-3">
               {recentLoans.map((l) => (
-                <div key={l.id} className="flex items-center justify-between rounded-lg border border-border/40 bg-background/30 px-3 py-2.5">
+                <div 
+                  key={l.id} 
+                  onClick={() => onNavigate('customers')}
+                  className="flex items-center justify-between rounded-lg border border-border/40 bg-background/30 px-3 py-2.5 cursor-pointer hover:bg-background/60 transition-colors"
+                >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{customerName(l.customer_id)}</p>
                     <p className="truncate text-xs text-muted-foreground">{vehicleLabel(l.vehicle_id)}</p>
@@ -89,6 +128,7 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
           )}
         </Card>
 
+        {/* RECENT PAYMENTS CARD */}
         <Card className="border-border/50 bg-card/50 p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold">Recent Payments</h2>
@@ -105,7 +145,11 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
               {recentPayments.map((p) => {
                 const loan = loans.find((l) => l.id === p.loan_id);
                 return (
-                  <div key={p.id} className="flex items-center justify-between rounded-lg border border-border/40 bg-background/30 px-3 py-2.5">
+                  <div 
+                    key={p.id} 
+                    onClick={() => onNavigate('customers')}
+                    className="flex items-center justify-between rounded-lg border border-border/40 bg-background/30 px-3 py-2.5 cursor-pointer hover:bg-background/60 transition-colors"
+                  >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{loan ? customerName(loan.customer_id) : 'Unknown'}</p>
                       <p className="text-xs text-muted-foreground">{formatDate(p.payment_date)}</p>
