@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import { Customer, Loan, Payment } from '@/lib/types';
+import { Customer } from '@/lib/types';
 import { formatKsh } from '@/lib/finance';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -13,8 +13,6 @@ import {
   User, 
   Phone, 
   MapPin, 
-  FileCheck, 
-  FileX, 
   ArrowUpRight, 
   CreditCard 
 } from 'lucide-react';
@@ -25,7 +23,7 @@ type CustomerWithFinancials = Customer & {
   totalPaid: number;
 };
 
-export default function CustomersPage() {
+export function CustomersView() {
   const [customers, setCustomers] = useState<CustomerWithFinancials[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -34,7 +32,6 @@ export default function CustomersPage() {
     async function fetchCustomersData() {
       const supabase = createClient();
 
-      // 1. Fetch all customers
       const { data: custData, error: custError } = await supabase
         .from('customers')
         .select('*')
@@ -46,14 +43,12 @@ export default function CustomersPage() {
         return;
       }
 
-      // 2. Fetch all loans & payments to compute live balances
       const { data: loanData } = await supabase.from('loans').select('*');
       const { data: paymentData } = await supabase.from('payments').select('*');
 
       const loans = loanData || [];
       const payments = paymentData || [];
 
-      // 3. Map financial summary onto each customer
       const compiledCustomers: CustomerWithFinancials[] = (custData || []).map((customer) => {
         const customerLoans = loans.filter((l) => l.customer_id === customer.id);
         const customerLoanIds = customerLoans.map((l) => l.id);
@@ -78,7 +73,6 @@ export default function CustomersPage() {
     fetchCustomersData();
   }, []);
 
-  // Filter customers by search input
   const filteredCustomers = customers.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.id_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -86,13 +80,13 @@ export default function CustomersPage() {
   );
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
-      {/* Top Bar */}
+    <div className="space-y-6">
+      {/* Search Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
           <p className="text-sm text-muted-foreground">
-            Select any customer to view details, upload logbooks/IDs, or view payment history.
+            Click on any customer card to open their detail page and upload documents.
           </p>
         </div>
         <div className="relative w-full sm:w-80">
@@ -107,11 +101,11 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Customer Grid */}
+      {/* Grid of Clickable Customer Cards */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="h-48 animate-pulse bg-muted/40" />
+            <Card key={i} className="h-44 animate-pulse bg-muted/40" />
           ))}
         </div>
       ) : filteredCustomers.length === 0 ? (
@@ -121,10 +115,9 @@ export default function CustomersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCustomers.map((customer) => {
-            const hasLogbook = Boolean(customer.logbook_url);
-            const hasId = Boolean(customer.id_document_url);
-            const hasAgreement = Boolean(customer.agreement_url);
-            const allDocsPresent = hasLogbook && hasId && hasAgreement;
+            const hasLogbook = Boolean((customer as any).logbook_url);
+            const hasId = Boolean((customer as any).id_document_url);
+            const hasAgreement = Boolean((customer as any).agreement_url);
 
             return (
               <Link key={customer.id} href={`/customers/${customer.id}`}>
@@ -147,7 +140,6 @@ export default function CustomersPage() {
                   </CardHeader>
 
                   <CardContent className="space-y-3 text-xs">
-                    {/* Contact Details */}
                     <div className="space-y-1 text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Phone className="h-3.5 w-3.5" />
@@ -159,7 +151,6 @@ export default function CustomersPage() {
                       </div>
                     </div>
 
-                    {/* Financial Summary */}
                     <div className="rounded-lg bg-muted/50 p-2.5 flex justify-between items-center">
                       <div>
                         <p className="text-[10px] uppercase font-semibold text-muted-foreground">Outstanding Balance</p>
@@ -176,7 +167,6 @@ export default function CustomersPage() {
                       </div>
                     </div>
 
-                    {/* Document Status Badges */}
                     <div className="pt-1 flex items-center justify-between border-t text-[11px]">
                       <span className="text-muted-foreground font-medium">Docs:</span>
                       <div className="flex items-center gap-1.5">
