@@ -42,7 +42,9 @@ export function CustomerDetailView({
   onBack,
 }: Props) {
   const [selectedReceiptPayment, setSelectedReceiptPayment] = useState<ExtendedPayment | null>(null);
-  const [logbookUrl, setLogbookUrl] = useState<string | null>(loan?.logbook_url ?? null);
+  const [logbookUrl, setLogbookUrl] = useState<string | null>(
+  (loan as (Loan & { logbook_url?: string | null }) | null)?.logbook_url ?? null
+);
   const [uploading, setUploading] = useState(false);
 
   // Sorting payment history by latest first
