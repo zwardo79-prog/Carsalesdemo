@@ -25,7 +25,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { CreditCard, Plus, TrendingDown, Receipt, Printer } from 'lucide-react';
-import { View } from '@/components/admin/sidebar';
 
 type Props = {
   loans: Loan[];
@@ -53,11 +52,6 @@ export function PaymentsView({ loans, customers, vehicles, payments, loading, on
     const v = vehicles.find((x) => x.id === id);
     return v ? `${v.year} ${v.make} ${v.model}` : 'N/A';
   };
-
-  const paymentsForLoan = useMemo(
-    () => (selectedLoanId ? payments.filter((p) => p.loan_id === selectedLoanId) : []),
-    [payments, selectedLoanId],
-  );
 
   const recordPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,8 +200,8 @@ export function PaymentsView({ loans, customers, vehicles, payments, loading, on
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Payment Amount ($) *</Label>
-              <Input id="amount" type="number" step="0.01" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="545.82" />
+              <Label htmlFor="amount">Payment Amount (Ksh) *</Label>
+              <Input id="amount" type="number" step="0.01" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="50000" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="note">Note</Label>
