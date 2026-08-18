@@ -30,7 +30,7 @@ export function formatCurrency(amount: number): string {
 }
 
 export function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+  return new Date(dateStr).toLocaleDateString('en-KE', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -44,7 +44,7 @@ export function toNumber(value: unknown): number {
 
 /** Formats as "KSH 1,600,000.00" to match the printed sale agreement. */
 export function formatKsh(amount: number): string {
-  return `KSH ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `KSH ${amount.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /** Formats a date string as "15.08.2026" to match the printed sale agreement. */
