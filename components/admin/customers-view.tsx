@@ -3,18 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Customer } from '@/lib/types';
-import { formatKsh } from '@/lib/finance';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  User, 
-  Phone, 
-  MapPin, 
-  ArrowUpRight, 
-  CreditCard 
-} from 'lucide-react';
+import { Search, User, Phone, MapPin, ArrowUpRight } from 'lucide-react';
 
 type Props = {
   customers: Customer[];
@@ -27,7 +19,7 @@ export function CustomersView({ customers, loading }: Props) {
 
   const filteredCustomers = customers.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.id_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (c.id_number && c.id_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (c.phone && c.phone.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -67,9 +59,9 @@ export function CustomersView({ customers, loading }: Props) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCustomers.map((customer) => {
-            const hasLogbook = Boolean((customer as any).logbook_url);
-            const hasId = Boolean((customer as any).id_document_url);
-            const hasAgreement = Boolean((customer as any).agreement_url);
+            const hasLogbook = Boolean(customer.logbook_url);
+            const hasId = Boolean(customer.id_document_url);
+            const hasAgreement = Boolean(customer.agreement_url);
 
             return (
               <Link key={customer.id} href={`/customers/${customer.id}`}>
@@ -84,7 +76,9 @@ export function CustomersView({ customers, loading }: Props) {
                           <CardTitle className="text-base font-semibold transition-colors group-hover:text-primary">
                             {customer.name}
                           </CardTitle>
-                          <p className="text-xs text-muted-foreground">ID: {customer.id_number}</p>
+                          <p className="text-xs text-muted-foreground">
+                            ID: {customer.id_number || 'N/A'}
+                          </p>
                         </div>
                       </div>
                       <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
