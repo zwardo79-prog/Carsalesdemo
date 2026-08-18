@@ -58,59 +58,58 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
 
   return (
     <div className="space-y-6">
-      {/* Global CSS for Print Mode */}
       <style jsx global>{`
         @media print {
-          /* 1. Remove browser headers, footers, and margins */
           @page {
-            margin: 10mm;
-            size: A4 portrait;
+            margin: 12mm;
+            size: auto;
           }
 
-          body {
+          /* Force body and root containers to plain white with no outline/borders */
+          html, body {
+            background: #ffffff !important;
             background-color: #ffffff !important;
             color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            overflow: visible !important;
           }
 
-          /* 2. Hide all floating controls, hamburger icons, sidebars, and header elements */
+          /* Target all UI overlays, sidebars, fixed buttons, and icons outside the contract */
+          body > *:not(#print-contract-area),
+          .print\\:hidden,
           button,
           nav,
           aside,
           header,
-          .fixed,
-          .absolute,
-          .print\\:hidden {
+          [class*="fixed"],
+          [class*="sticky"],
+          [class*="absolute"] {
             display: none !important;
           }
 
-          /* 3. Prevent overlapping text and overflow clipping */
-          .space-y-6,
-          .max-w-3xl {
-            max-width: 100% !important;
+          /* Ensure the contract container fills naturally without border outlines */
+          .printable-card {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            padding: 0 !important;
             margin: 0 !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-            border: none !important;
+            width: 100% !important;
+            max-width: 100% !important;
           }
 
-          .border-border\\/60 {
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            overflow: visible !important;
-          }
-
-          ol,
-          .grid {
-            page-break-inside: avoid;
+          /* Fix overlapping and force sections to flow across pages */
+          ol, .grid, p, div {
+            page-break-inside: auto;
           }
         }
       `}</style>
 
-      {/* Screen-Only Header & Controls */}
+      {/* Control Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Contracts</h1>
@@ -148,140 +147,142 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
           <p className="mt-1 text-sm text-muted-foreground">Choose a loan from the dropdown above.</p>
         </Card>
       ) : (
-        <Card className="mx-auto max-w-3xl border-border/60 bg-white p-8 text-black print:border-0 print:p-0 print:shadow-none">
-          {/* Letterhead */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-md border-2 border-blue-800">
-                <CarIcon className="h-8 w-8 text-blue-800" />
+        <div id="print-contract-area">
+          <Card className="printable-card mx-auto max-w-3xl border-border/60 bg-white p-8 text-black">
+            {/* Letterhead */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-md border-2 border-blue-800">
+                  <CarIcon className="h-8 w-8 text-blue-800" />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-extrabold italic text-red-600">SAKINYA MOTORS</h2>
+                  <p className="text-xs italic font-semibold text-red-600">&quot;YOUR ULTIMATE DRIVING SOLUTION &quot;</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-2 text-center text-sm font-semibold text-red-600">
+              Dealers in: New and Clean Second hand Motor Vehicles and We also do Trade in
+            </p>
+
+            <div className="mt-2 border-t-2 border-red-600 pt-2">
+              <div className="grid grid-cols-3 gap-2 text-[11px] font-medium">
+                <div>
+                  <p>Along Oginga Odinga Rd.</p>
+                  <p>Evans Hospital roundabout opp.</p>
+                  <p>Charismata Church</p>
+                </div>
+                <div>
+                  <p>Email:sakinyamotors2019@gmail.com</p>
+                  <p>Website: www.sakinyamotors.com</p>
+                </div>
+                <div className="text-right">
+                  <p>P.O Box 9582-20100</p>
+                  <p>Nakuru Kenya</p>
+                  <p>Tel: 0722 384 118</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-2 border-t-2 border-red-600" />
+
+            {/* Document Title */}
+            <p className="mt-4 text-sm font-bold underline">
+              MOTOR VEHICLE SALE AGREEMENT {formatDateDMY(loan.contract_date)}
+            </p>
+
+            {/* Vehicle specs */}
+            <div className="mt-3 space-y-0.5">
+              {specRow('MAKE', vehicle ? `${vehicle.make} ${vehicle.model}` : '')}
+              {specRow('REG NO', vehicle?.reg_no)}
+              {specRow('CHASSIS NO', vehicle?.chassis_no)}
+              {specRow('ENGINE NO', vehicle?.engine_no)}
+              {specRow('COLOUR', vehicle?.colour)}
+              {specRow('FUEL', vehicle?.fuel_type)}
+              {specRow('MANUFACTURE YEAR', vehicle?.year)}
+              {specRow('ENGINE CAPACITY', vehicle?.engine_capacity)}
+            </div>
+
+            {/* Buyer Details */}
+            <div className="mt-3 space-y-0.5 text-sm">
+              <p>
+                <span className="font-semibold">- BUYER &#39;S NAME: {customer?.name?.toUpperCase() ?? ''}</span>
+                <span className="ml-6">IDNO; {customer?.id_number ?? ''}</span>
+              </p>
+              <p className="pl-3">
+                <span className="font-semibold">RESIDENCE: {customer?.address ?? ''}</span>
+                <span className="ml-6">TEL NO:{customer?.phone ?? ''}</span>
+              </p>
+              <p className="font-bold underline">
+                PURCHASE PRICE: KSH {Number(loan.vehicle_price).toLocaleString('en-US', { minimumFractionDigits: 2 })}/= ({amountInWords(loan.vehicle_price)})
+              </p>
+            </div>
+
+            {/* Deposit & Balance Schedule */}
+            <div className="mt-3 space-y-1 text-sm">
+              <p>
+                <span className="font-semibold underline">DEPOSIT</span>
+                <span className="ml-6 font-semibold underline">
+                  : {formatKsh(Number(loan.deposit))} PAID IN CASH ON {formatDateDMY(loan.deposit_date)}
+                </span>
+              </p>
+              <p>
+                <span className="font-semibold underline">BALANCE</span>
+                <span className="ml-6 font-semibold underline">
+                  : {formatKsh(Number(loan.balance))} TO BE PAID AS FOLLOWS.
+                </span>
+              </p>
+              {loanBalanceItems.length > 0 && (
+                <div className="pl-8">
+                  {loanBalanceItems.map((item) => (
+                    <p key={item.id} className="font-semibold underline">
+                      - {formatKsh(Number(item.amount))} {item.description}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Terms & Conditions */}
+            <ol className="mt-4 list-none space-y-1 text-[11px] leading-snug">
+              {TERMS.map((t, i) => (
+                <li key={i}>
+                  {i + 1}. {t}
+                  {i === 5 && (
+                    <div className="pl-4">- Immediately upon the seller receiving the last installment.</div>
+                  )}
+                </li>
+              ))}
+            </ol>
+
+            {/* Signatures */}
+            <div className="mt-8 grid grid-cols-2 gap-8 text-sm">
+              <div>
+                <p className="font-bold text-red-600">SELLER: SAKINYA MOTORS</p>
+                <p className="mt-6">SIGN………………………</p>
+                <p className="mt-3">DATE:{formatDateDMY(loan.contract_date)}</p>
               </div>
               <div>
-                <h2 className="text-3xl font-extrabold italic text-red-600">SAKINYA MOTORS</h2>
-                <p className="text-xs italic font-semibold text-red-600">&quot;YOUR ULTIMATE DRIVING SOLUTION &quot;</p>
+                <p className="font-bold text-blue-800">BUYER: {customer?.name?.toUpperCase() ?? ''}</p>
+                <p className="mt-6">SIGN……………</p>
+                <p className="mt-3">DATE: {formatDateDMY(loan.contract_date)}</p>
               </div>
             </div>
-          </div>
 
-          <p className="mt-2 text-center text-sm font-semibold text-red-600">
-            Dealers in: New and Clean Second hand Motor Vehicles and We also do Trade in
-          </p>
-
-          <div className="mt-2 border-t-2 border-red-600 pt-2">
-            <div className="grid grid-cols-3 gap-2 text-[11px] font-medium">
-              <div>
-                <p>Along Oginga Odinga Rd.</p>
-                <p>Evans Hospital roundabout opp.</p>
-                <p>Charismata Church</p>
-              </div>
-              <div>
-                <p>Email:sakinyamotors2019@gmail.com</p>
-                <p>Website: www.sakinyamotors.com</p>
-              </div>
-              <div className="text-right">
-                <p>P.O Box 9582-20100</p>
-                <p>Nakuru Kenya</p>
-                <p>Tel: 0722 384 118</p>
-              </div>
+            {/* Witness Details */}
+            <div className="mt-4 text-center text-sm">
+              <p>
+                WITNESS: {loan.witness_name?.toUpperCase() ?? ''} &nbsp; IDNO: {loan.witness_id_number ?? ''}
+              </p>
+              <p>TEL NO: {loan.witness_phone ?? ''} &nbsp; SIGN………………</p>
             </div>
-          </div>
-          <div className="mt-2 border-t-2 border-red-600" />
 
-          {/* Document Title */}
-          <p className="mt-4 text-sm font-bold underline">
-            MOTOR VEHICLE SALE AGREEMENT {formatDateDMY(loan.contract_date)}
-          </p>
-
-          {/* Vehicle specs */}
-          <div className="mt-3 space-y-0.5">
-            {specRow('MAKE', vehicle ? `${vehicle.make} ${vehicle.model}` : '')}
-            {specRow('REG NO', vehicle?.reg_no)}
-            {specRow('CHASSIS NO', vehicle?.chassis_no)}
-            {specRow('ENGINE NO', vehicle?.engine_no)}
-            {specRow('COLOUR', vehicle?.colour)}
-            {specRow('FUEL', vehicle?.fuel_type)}
-            {specRow('MANUFACTURE YEAR', vehicle?.year)}
-            {specRow('ENGINE CAPACITY', vehicle?.engine_capacity)}
-          </div>
-
-          {/* Buyer Details */}
-          <div className="mt-3 space-y-0.5 text-sm">
-            <p>
-              <span className="font-semibold">- BUYER &#39;S NAME: {customer?.name?.toUpperCase() ?? ''}</span>
-              <span className="ml-6">IDNO; {customer?.id_number ?? ''}</span>
+            <div className="mt-4 border-t-2 border-blue-800" />
+            <p className="mt-2 text-center text-sm font-semibold text-red-600">
+              Kindly quote our reference when replying
             </p>
-            <p className="pl-3">
-              <span className="font-semibold">RESIDENCE: {customer?.address ?? ''}</span>
-              <span className="ml-6">TEL NO:{customer?.phone ?? ''}</span>
-            </p>
-            <p className="font-bold underline">
-              PURCHASE PRICE: KSH {Number(loan.vehicle_price).toLocaleString('en-US', { minimumFractionDigits: 2 })}/= ({amountInWords(loan.vehicle_price)})
-            </p>
-          </div>
-
-          {/* Deposit & Balance Schedule */}
-          <div className="mt-3 space-y-1 text-sm">
-            <p>
-              <span className="font-semibold underline">DEPOSIT</span>
-              <span className="ml-6 font-semibold underline">
-                : {formatKsh(Number(loan.deposit))} PAID IN CASH ON {formatDateDMY(loan.deposit_date)}
-              </span>
-            </p>
-            <p>
-              <span className="font-semibold underline">BALANCE</span>
-              <span className="ml-6 font-semibold underline">
-                : {formatKsh(Number(loan.balance))} TO BE PAID AS FOLLOWS.
-              </span>
-            </p>
-            {loanBalanceItems.length > 0 && (
-              <div className="pl-8">
-                {loanBalanceItems.map((item) => (
-                  <p key={item.id} className="font-semibold underline">
-                    - {formatKsh(Number(item.amount))} {item.description}
-                  </p>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Terms & Conditions */}
-          <ol className="mt-4 list-none space-y-1 text-[11px] leading-snug">
-            {TERMS.map((t, i) => (
-              <li key={i}>
-                {i + 1}. {t}
-                {i === 5 && (
-                  <div className="pl-4">- Immediately upon the seller receiving the last installment.</div>
-                )}
-              </li>
-            ))}
-          </ol>
-
-          {/* Signatures */}
-          <div className="mt-8 grid grid-cols-2 gap-8 text-sm">
-            <div>
-              <p className="font-bold text-red-600">SELLER: SAKINYA MOTORS</p>
-              <p className="mt-6">SIGN………………………</p>
-              <p className="mt-3">DATE:{formatDateDMY(loan.contract_date)}</p>
-            </div>
-            <div>
-              <p className="font-bold text-blue-800">BUYER: {customer?.name?.toUpperCase() ?? ''}</p>
-              <p className="mt-6">SIGN……………</p>
-              <p className="mt-3">DATE: {formatDateDMY(loan.contract_date)}</p>
-            </div>
-          </div>
-
-          {/* Witness Details */}
-          <div className="mt-4 text-center text-sm">
-            <p>
-              WITNESS: {loan.witness_name?.toUpperCase() ?? ''} &nbsp; IDNO: {loan.witness_id_number ?? ''}
-            </p>
-            <p>TEL NO: {loan.witness_phone ?? ''} &nbsp; SIGN………………</p>
-          </div>
-
-          <div className="mt-4 border-t-2 border-blue-800" />
-          <p className="mt-2 text-center text-sm font-semibold text-red-600">
-            Kindly quote our reference when replying
-          </p>
-        </Card>
+          </Card>
+        </div>
       )}
     </div>
   );
