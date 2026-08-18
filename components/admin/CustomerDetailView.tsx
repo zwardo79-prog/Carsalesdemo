@@ -15,18 +15,24 @@ import {
   Upload, 
   Printer, 
   DollarSign, 
-  CheckCircle, 
   ExternalLink,
   ArrowLeft
 } from 'lucide-react';
 
+// Extended types local to this view to ensure strict Vercel build checks pass
+type ExtendedLoan = Loan & {
+  total_amount?: number | string | null;
+  logbook_url?: string | null;
+};
+
 type ExtendedPayment = Payment & {
-  logbook_url?: string;
+  amount?: number | string;
+  logbook_url?: string | null;
 };
 
 type Props = {
   customer: Customer;
-  loan: Loan | null;
+  loan: ExtendedLoan | null;
   vehicle: Vehicle | null;
   payments: ExtendedPayment[];
   onUploadLogbook?: (loanId: string, file: File) => Promise<void>;
@@ -37,24 +43,22 @@ export function CustomerDetailView({
   customer,
   loan,
   vehicle,
-  payments,
+  payments = [],
   onUploadLogbook,
   onBack,
 }: Props) {
   const [selectedReceiptPayment, setSelectedReceiptPayment] = useState<ExtendedPayment | null>(null);
-  const [logbookUrl, setLogbookUrl] = useState<string | null>(
-  (loan as (Loan & { logbook_url?: string | null }) | null)?.logbook_url ?? null
-);
+  const [logbookUrl, setLogbookUrl] = useState<string | null>(loan?.logbook_url ?? null);
   const [uploading, setUploading] = useState(false);
 
   // Sorting payment history by latest first
-  const sortedPayments = [...payments].sort(
+  const sortedPayments = [...(payments || [])].sort(
     (a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime()
   );
 
-  // Financial calculations
+  // Financial calculations safely handling string or number types
   const totalAgreedPrice = loan ? Number(loan.total_amount ?? 0) : 0;
-  const totalPaid = sortedPayments.reduce((acc, p) => acc + Number(p.amount), 0);
+  const totalPaid = sortedPayments.reduce((acc, p) => acc + Number(p.amount ?? 0), 0);
   const remainingBalance = totalAgreedPrice > 0 ? Math.max(0, totalAgreedPrice - totalPaid) : 0;
   const progressPercent = totalAgreedPrice > 0 ? Math.min(100, Math.round((totalPaid / totalAgreedPrice) * 100)) : 0;
 
@@ -69,6 +73,8 @@ export function CustomerDetailView({
       setUploading(true);
       try {
         await onUploadLogbook(loan.id, file);
+      } catch (err) {
+        console.error("Logbook upload error:", err);
       } finally {
         setUploading(false);
       }
@@ -273,7 +279,7 @@ export function CustomerDetailView({
                         <td className="py-3 text-xs text-muted-foreground font-mono">#{p.id.slice(0, 8).toUpperCase()}</td>
                         <td className="py-3 text-xs">{p.note || 'Regular Installment'}</td>
                         <td className="py-3 text-right font-bold text-green-600 dark:text-green-400">
-                          {formatKsh(Number(p.amount))}
+                          {formatKsh(Number(p.amount ?? 0))}
                         </td>
                         <td className="py-3 text-center">
                           <Button 
@@ -375,9 +381,9 @@ export function CustomerDetailView({
               <div className="space-y-1">
                 <div className="flex justify-between text-[12px] font-bold">
                   <span>AMOUNT PAID:</span>
-                  <span>{formatKsh(Number(selectedReceiptPayment.amount))}</span>
+                  <span>{formatKsh(Number(selectedReceiptPayment.amount ?? 0))}</span>
                 </div>
-                <p className="text-[9px] italic leading-tight">({amountInWords(Number(selectedReceiptPayment.amount))})</p>
+                <p className="text-[9px] italic leading-tight">({amountInWords(Number(selectedReceiptPayment.amount ?? 0))})</p>
 
                 {loan && (
                   <>
