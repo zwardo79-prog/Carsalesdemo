@@ -134,12 +134,12 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
                 <p className="text-xs text-muted-foreground">No payments recorded yet.</p>
               ) : (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {payments.map((p) => (
-                    <div key={p.id} className="flex justify-between text-xs border-b py-1">
-                      <span>{formatDateDMY(p.payment_date)} ({p.payment_method})</span>
-                      <span className="font-medium text-green-600">+{formatKsh(Number(p.amount))}</span>
-                    </div>
-                  ))}
+                 {payments.map((p) => (
+                  <div key={p.id} className="flex justify-between text-xs border-b py-1">
+                    <span>{formatDateDMY(p.payment_date)}</span>
+                    <span className="font-medium text-green-600">+{formatKsh(Number(p.amount))}</span>
+                  </div>
+                 ))}
                 </div>
               )}
             </div>
