@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import { Customer } from '@/lib/types';
 import { formatKsh } from '@/lib/finance';
 import { Input } from '@/components/ui/input';
@@ -17,66 +16,19 @@ import {
   CreditCard 
 } from 'lucide-react';
 
-type CustomerWithFinancials = Customer & {
-  activeLoanCount: number;
-  totalBalance: number;
-  totalPaid: number;
+type Props = {
+  customers: Customer[];
+  loading: boolean;
+  onChanged?: () => void;
 };
 
-export function CustomersView() {
-  const [customers, setCustomers] = useState<CustomerWithFinancials[]>([]);
+export function CustomersView({ customers, loading }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchCustomersData() {
-      const supabase = createClient();
-
-      const { data: custData, error: custError } = await supabase
-        .from('customers')
-        .select('*')
-        .order('name', { ascending: true });
-
-      if (custError) {
-        console.error('Error fetching customers:', custError);
-        setLoading(false);
-        return;
-      }
-
-      const { data: loanData } = await supabase.from('loans').select('*');
-      const { data: paymentData } = await supabase.from('payments').select('*');
-
-      const loans = loanData || [];
-      const payments = paymentData || [];
-
-      const compiledCustomers: CustomerWithFinancials[] = (custData || []).map((customer) => {
-        const customerLoans = loans.filter((l) => l.customer_id === customer.id);
-        const customerLoanIds = customerLoans.map((l) => l.id);
-
-        const totalBalance = customerLoans.reduce((acc, l) => acc + Number(l.balance || 0), 0);
-        const totalPaid = payments
-          .filter((p) => customerLoanIds.includes(p.loan_id))
-          .reduce((acc, p) => acc + Number(p.amount || 0), 0);
-
-        return {
-          ...customer,
-          activeLoanCount: customerLoans.length,
-          totalBalance,
-          totalPaid,
-        };
-      });
-
-      setCustomers(compiledCustomers);
-      setLoading(false);
-    }
-
-    fetchCustomersData();
-  }, []);
 
   const filteredCustomers = customers.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.id_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.phone.toLowerCase().includes(searchQuery.toLowerCase())
+    (c.phone && c.phone.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
@@ -148,22 +100,6 @@ export function CustomersView() {
                       <div className="flex items-center gap-2">
                         <MapPin className="h-3.5 w-3.5" />
                         <span>{customer.address || 'No residence listed'}</span>
-                      </div>
-                    </div>
-
-                    <div className="rounded-lg bg-muted/50 p-2.5 flex justify-between items-center">
-                      <div>
-                        <p className="text-[10px] uppercase font-semibold text-muted-foreground">Outstanding Balance</p>
-                        <p className="text-sm font-bold text-foreground">
-                          {formatKsh(customer.totalBalance)}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] uppercase font-semibold text-muted-foreground">Active Loans</p>
-                        <Badge variant="outline" className="mt-0.5">
-                          <CreditCard className="h-3 w-3 mr-1" />
-                          {customer.activeLoanCount}
-                        </Badge>
                       </div>
                     </div>
 
