@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Receipt as ReceiptIcon, Printer, Car as CarIcon } from 'lucide-react';
+import { Receipt as ReceiptIcon, Printer } from 'lucide-react';
 
 type Props = {
   loans: Loan[];
@@ -43,6 +43,7 @@ export function ReceiptsView({ loans, customers, vehicles, payments, loading, in
 
   return (
     <div className="space-y-6">
+      {/* Non-printable Controls */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Receipts</h1>
@@ -72,99 +73,154 @@ export function ReceiptsView({ loans, customers, vehicles, payments, loading, in
       </div>
 
       {loading ? (
-        <Card className="border-border/50 bg-card/40 p-12 text-center text-sm text-muted-foreground">Loading...</Card>
+        <Card className="border-border/50 bg-card/40 p-12 text-center text-sm text-muted-foreground print:hidden">Loading...</Card>
       ) : !payment ? (
-        <Card className="border-border/50 bg-card/40 p-12 text-center">
+        <Card className="border-border/50 bg-card/40 p-12 text-center print:hidden">
           <ReceiptIcon className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
           <h3 className="text-lg font-semibold">Select a payment to preview the receipt</h3>
           <p className="mt-1 text-sm text-muted-foreground">Choose a payment from the dropdown above.</p>
         </Card>
       ) : (
-        <Card className="mx-auto max-w-xl border-border/60 bg-white p-8 text-black print:border-0 print:shadow-none">
-          {/* Letterhead */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-md border-2 border-blue-800">
-              <CarIcon className="h-8 w-8 text-blue-800" />
+        /* Printable Thermal Receipt Wrapper */
+        <div className="flex justify-center">
+          <Card id="receipt-printable" className="w-[80mm] max-w-[80mm] border-border/60 bg-white p-3 text-black print:p-0 print:border-0 print:shadow-none font-mono text-[11px] leading-tight">
+            {/* Header / Letterhead */}
+            <div className="text-center space-y-1">
+              <h2 className="text-base font-extrabold tracking-wider uppercase">SAKINYA MOTORS</h2>
+              <p className="text-[10px] font-bold">&quot;YOUR ULTIMATE DRIVING SOLUTION&quot;</p>
+              <p className="text-[9px] leading-tight">Dealers in: New & Clean Second Hand Motor Vehicles & Trade-Ins</p>
             </div>
-            <div>
-              <h2 className="text-3xl font-extrabold italic text-red-600">SAKINYA MOTORS</h2>
-              <p className="text-xs italic font-semibold text-red-600">&quot;YOUR ULTIMATE DRIVING SOLUTION &quot;</p>
+
+            <div className="my-2 border-t border-dashed border-black" />
+
+            <div className="text-[10px] space-y-0.5">
+              <p>Along Oginga Odinga Rd, Opp. Charismata Church</p>
+              <p>Nakuru, Kenya | Tel: 0722 384 118</p>
+              <p>Email: sakinyamotors2019@gmail.com</p>
             </div>
-          </div>
 
-          <p className="mt-2 text-center text-sm font-semibold text-red-600">
-            Dealers in: New and Clean Second hand Motor Vehicles and We also do Trade in
-          </p>
+            <div className="my-2 border-t border-dashed border-black" />
 
-          <div className="mt-2 border-t-2 border-red-600 pt-2">
-            <div className="grid grid-cols-3 gap-2 text-[11px] font-medium">
+            {/* Receipt Details */}
+            <div className="flex justify-between font-bold text-[12px] uppercase">
+              <span>PAYMENT RECEIPT</span>
+              <span>#{payment.id.slice(0, 8).toUpperCase()}</span>
+            </div>
+
+            <div className="my-2 border-t border-dashed border-black" />
+
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <span className="font-bold">Date:</span>
+                <span>{formatDateDMY(payment.payment_date)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-bold">Customer:</span>
+                <span className="truncate max-w-[140px]">{customer?.name?.toUpperCase() ?? 'N/A'}</span>
+              </div>
+              {customer?.phone && (
+                <div className="flex justify-between">
+                  <span className="font-bold">Tel No:</span>
+                  <span>{customer.phone}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="font-bold">Vehicle:</span>
+                <span className="text-right truncate max-w-[140px]">
+                  {vehicle ? `${vehicle.make} ${vehicle.model} ${vehicle.reg_no ? `(${vehicle.reg_no})` : ''}` : 'N/A'}
+                </span>
+              </div>
+              {payment.note && (
+                <div className="flex justify-between">
+                  <span className="font-bold">For:</span>
+                  <span className="text-right truncate max-w-[140px]">{payment.note}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="my-2 border-t border-dashed border-black" />
+
+            {/* Financial Amounts */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-[12px] font-bold">
+                <span>AMOUNT PAID:</span>
+                <span>{formatKsh(Number(payment.amount))}</span>
+              </div>
+              <p className="text-[9px] italic leading-tight">({amountInWords(Number(payment.amount))})</p>
+
+              {loan && (
+                <>
+                  <div className="my-1 border-t border-dotted border-black" />
+                  <div className="flex justify-between text-[10px]">
+                    <span>Balance Before:</span>
+                    <span>{formatKsh(Number(payment.remaining_after) + Number(payment.amount))}</span>
+                  </div>
+                  <div className="flex justify-between text-[10px] font-bold">
+                    <span>Balance Remaining:</span>
+                    <span>{formatKsh(Number(payment.remaining_after))}</span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="my-2 border-t border-dashed border-black" />
+
+            {/* Signatures */}
+            <div className="mt-6 grid grid-cols-2 gap-4 text-[9px] text-center">
               <div>
-                <p>Along Oginga Odinga Rd.</p>
-                <p>Evans Hospital roundabout opp.</p>
-                <p>Charismata Church</p>
+                <div className="mb-6 border-b border-black" />
+                <p>Received By</p>
               </div>
               <div>
-                <p>Email:sakinyamotors2019@gmail.com</p>
-                <p>Website: www.sakinyamotors.com</p>
-              </div>
-              <div className="text-right">
-                <p>P.O Box 9582-20100</p>
-                <p>Nakuru Kenya</p>
-                <p>Tel: 0722 384 118</p>
+                <div className="mb-6 border-b border-black" />
+                <p>Customer Sign</p>
               </div>
             </div>
-          </div>
-          <div className="mt-2 border-t-2 border-red-600" />
 
-          {/* Title */}
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm font-bold underline">PAYMENT RECEIPT</p>
-            <p className="text-xs">
-              Receipt No: <span className="font-semibold">{payment.id.slice(0, 8).toUpperCase()}</span>
+            <div className="my-2 border-t border-dashed border-black" />
+
+            <p className="text-center text-[9px] font-bold uppercase mt-2">
+              Kindly quote reference when replying
             </p>
-          </div>
-
-          <div className="mt-4 space-y-1 text-sm">
-            <p><span className="font-semibold">Date:</span> {formatDateDMY(payment.payment_date)}</p>
-            <p><span className="font-semibold">Received From:</span> {customer?.name?.toUpperCase() ?? ''}</p>
-            {customer?.phone && <p><span className="font-semibold">Tel No:</span> {customer.phone}</p>}
-            <p>
-              <span className="font-semibold">Vehicle:</span>{' '}
-              {vehicle ? `${vehicle.make} ${vehicle.model}${vehicle.reg_no ? ` — ${vehicle.reg_no}` : ''}` : '—'}
-            </p>
-            {payment.note && <p><span className="font-semibold">For:</span> {payment.note}</p>}
-          </div>
-
-          <div className="mt-4 border-t border-black pt-3">
-            <p className="text-sm font-bold underline">
-              AMOUNT RECEIVED: {formatKsh(Number(payment.amount))}/= ({amountInWords(Number(payment.amount))})
-            </p>
-          </div>
-
-          {loan && (
-            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-              <p><span className="font-semibold">Balance Before:</span> {formatKsh(Number(payment.remaining_after) + Number(payment.amount))}</p>
-              <p><span className="font-semibold">Balance Remaining:</span> {formatKsh(Number(payment.remaining_after))}</p>
-            </div>
-          )}
-
-          <div className="mt-10 grid grid-cols-2 gap-8 text-sm">
-            <div>
-              <div className="mb-10 border-b border-black" />
-              <p className="text-xs">Received By (Sakinya Motors)</p>
-            </div>
-            <div>
-              <div className="mb-10 border-b border-black" />
-              <p className="text-xs">Customer Signature</p>
-            </div>
-          </div>
-
-          <div className="mt-4 border-t-2 border-blue-800" />
-          <p className="mt-2 text-center text-sm font-semibold text-red-600">
-            Kindly quote our reference when replying
-          </p>
-        </Card>
+            <p className="text-center text-[9px] mt-1">*** Thank you for your business ***</p>
+          </Card>
+        </div>
       )}
+
+      {/* Global CSS Overrides for Thermal Printer Output */}
+      <style jsx global>{`
+        @media print {
+          /* Hide all UI shell elements except printable area */
+          body * {
+            visibility: hidden;
+          }
+
+          /* Force continuous roll page size for standard thermal printer */
+          @page {
+            size: 80mm auto;
+            margin: 0mm;
+          }
+
+          #receipt-printable,
+          #receipt-printable * {
+            visibility: visible;
+          }
+
+          #receipt-printable {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 80mm !important;
+            max-width: 80mm !important;
+            margin: 0 !important;
+            padding: 4mm !important;
+            box-shadow: none !important;
+            border: none !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
