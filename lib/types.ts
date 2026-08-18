@@ -18,6 +18,12 @@ export type Vehicle = {
   vin: string | null;
   price: number;
   status: VehicleStatus;
+  reg_no: string | null;
+  chassis_no: string | null;
+  engine_no: string | null;
+  colour: string | null;
+  fuel_type: string | null;
+  engine_capacity: string | null;
   created_at: string;
 };
 
@@ -36,6 +42,21 @@ export type Loan = {
   remaining_balance: number;
   status: LoanStatus;
   start_date: string;
+  contract_date: string | null;
+  deposit_date: string | null;
+  witness_name: string | null;
+  witness_id_number: string | null;
+  witness_phone: string | null;
+  created_at: string;
+};
+
+export type BalanceItem = {
+  id: string;
+  loan_id: string;
+  description: string;
+  amount: number;
+  due_date: string | null;
+  sort_order: number;
   created_at: string;
 };
 

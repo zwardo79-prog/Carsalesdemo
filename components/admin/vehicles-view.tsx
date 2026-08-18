@@ -30,9 +30,18 @@ type FormState = {
   year: string;
   vin: string;
   price: string;
+  regNo: string;
+  chassisNo: string;
+  engineNo: string;
+  colour: string;
+  fuelType: string;
+  engineCapacity: string;
 };
 
-const EMPTY: FormState = { make: '', model: '', year: String(new Date().getFullYear()), vin: '', price: '' };
+const EMPTY: FormState = {
+  make: '', model: '', year: String(new Date().getFullYear()), vin: '', price: '',
+  regNo: '', chassisNo: '', engineNo: '', colour: '', fuelType: '', engineCapacity: '',
+};
 
 const statusColor: Record<VehicleStatus, string> = {
   available: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
@@ -56,6 +65,12 @@ export function VehiclesView({ vehicles, loading, onChanged }: Props) {
       vin: form.vin || null,
       price: toNumber(form.price),
       status: 'available',
+      reg_no: form.regNo || null,
+      chassis_no: form.chassisNo || null,
+      engine_no: form.engineNo || null,
+      colour: form.colour || null,
+      fuel_type: form.fuelType || null,
+      engine_capacity: form.engineCapacity || null,
     });
     setSaving(false);
     setOpen(false);
@@ -169,6 +184,36 @@ export function VehiclesView({ vehicles, loading, onChanged }: Props) {
             <div className="space-y-2">
               <Label htmlFor="vin">VIN</Label>
               <Input id="vin" value={form.vin} onChange={(e) => setForm({ ...form, vin: e.target.value })} placeholder="Vehicle identification number" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="regNo">Reg No</Label>
+                <Input id="regNo" value={form.regNo} onChange={(e) => setForm({ ...form, regNo: e.target.value })} placeholder="KDY 209A" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="colour">Colour</Label>
+                <Input id="colour" value={form.colour} onChange={(e) => setForm({ ...form, colour: e.target.value })} placeholder="Red" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="chassisNo">Chassis No</Label>
+                <Input id="chassisNo" value={form.chassisNo} onChange={(e) => setForm({ ...form, chassisNo: e.target.value })} placeholder="BMLFS-112554" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="engineNo">Engine No</Label>
+                <Input id="engineNo" value={form.engineNo} onChange={(e) => setForm({ ...form, engineNo: e.target.value })} placeholder="S5-30423441" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="fuelType">Fuel</Label>
+                <Input id="fuelType" value={form.fuelType} onChange={(e) => setForm({ ...form, fuelType: e.target.value })} placeholder="Diesel" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="engineCapacity">Engine Capacity</Label>
+                <Input id="engineCapacity" value={form.engineCapacity} onChange={(e) => setForm({ ...form, engineCapacity: e.target.value })} placeholder="1490CC" />
+              </div>
             </div>
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>

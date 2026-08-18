@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { DashboardStats, Customer, Vehicle, Loan, Payment } from '@/lib/types';
+import { DashboardStats, Customer, Vehicle, Loan, Payment, BalanceItem } from '@/lib/types';
 import { Sidebar, type View } from '@/components/admin/sidebar';
 import { DashboardView } from '@/components/admin/dashboard-view';
 import { CustomersView } from '@/components/admin/customers-view';
@@ -18,20 +18,22 @@ export default function AdminPage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loans, setLoans] = useState<Loan[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [balanceItems, setBalanceItems] = useState<BalanceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
-    const [cust, veh, loa, pay] = await Promise.all([
+    const [cust, veh, loa, pay, bal] = await Promise.all([
       supabase.from('customers').select('*').order('created_at', { ascending: false }),
       supabase.from('vehicles').select('*').order('created_at', { ascending: false }),
       supabase.from('loans').select('*').order('created_at', { ascending: false }),
       supabase.from('payments').select('*').order('payment_date', { ascending: false }),
+      supabase.from('balance_items').select('*').order('sort_order', { ascending: true }),
     ]);
 
-    if (cust.error || veh.error || loa.error || pay.error) {
+    if (cust.error || veh.error || loa.error || pay.error || bal.error) {
       setError('Unable to load data. Please try again.');
       setLoading(false);
       return;
@@ -41,10 +43,12 @@ export default function AdminPage() {
     const v = (veh.data as Vehicle[]) ?? [];
     const l = (loa.data as Loan[]) ?? [];
     const p = (pay.data as Payment[]) ?? [];
+    const b = (bal.data as BalanceItem[]) ?? [];
     setCustomers(c);
     setVehicles(v);
     setLoans(l);
     setPayments(p);
+    setBalanceItems(b);
 
     const activeLoans = l.filter((x) => x.status === 'active');
     setStats({
@@ -89,7 +93,7 @@ export default function AdminPage() {
             <PaymentsView loans={loans} customers={customers} vehicles={vehicles} payments={payments} loading={loading} onChanged={refresh} />
           )}
           {view === 'contracts' && (
-            <ContractsView loans={loans} customers={customers} vehicles={vehicles} payments={payments} loading={loading} />
+            <ContractsView loans={loans} customers={customers} vehicles={vehicles} payments={payments} balanceItems={balanceItems} loading={loading} />
           )}
         </div>
       </main>

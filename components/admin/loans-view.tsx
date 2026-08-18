@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Customer, Vehicle, Loan, Payment } from '@/lib/types';
+import { Customer, Vehicle, Loan, Payment, BalanceItem } from '@/lib/types';
 import { supabase } from '@/lib/supabase/client';
 import { calculateBalance, calculateMonthlyPayment, formatCurrency, formatDate, toNumber } from '@/lib/finance';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Landmark, Plus, User, Car, Calendar, Wallet } from 'lucide-react';
+import { Landmark, Plus, User, Car, Calendar, Wallet, Trash2 } from 'lucide-react';
 
 declare global {
   namespace JSX {
@@ -48,13 +48,29 @@ type FormState = {
   deposit: string;
   duration: string;
   interestRate: string;
+  contractDate: string;
+  depositDate: string;
+  witnessName: string;
+  witnessIdNumber: string;
+  witnessPhone: string;
 };
 
-const EMPTY: FormState = { customerId: '', vehicleId: '', deposit: '', duration: '48', interestRate: '6.5' };
+type BalanceLineInput = { description: string; amount: string; dueDate: string };
+
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
+const EMPTY: FormState = {
+  customerId: '', vehicleId: '', deposit: '', duration: '48', interestRate: '6.5',
+  contractDate: todayStr(), depositDate: todayStr(),
+  witnessName: '', witnessIdNumber: '', witnessPhone: '',
+};
+
+const EMPTY_LINE: BalanceLineInput = { description: '', amount: '', dueDate: '' };
 
 export function LoansView({ loans, customers, vehicles, payments, loading, onChanged }: Props) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY);
+  const [balanceLines, setBalanceLines] = useState<BalanceLineInput[]>([{ ...EMPTY_LINE }]);
   const [saving, setSaving] = useState(false);
 
   const selectedVehicle = vehicles.find((v) => v.id === form.vehicleId) ?? null;
@@ -92,6 +108,11 @@ export function LoansView({ loans, customers, vehicles, payments, loading, onCha
         remaining_balance: balance,
         status: 'active',
         start_date: new Date().toISOString().slice(0, 10),
+        contract_date: form.contractDate || null,
+        deposit_date: form.depositDate || null,
+        witness_name: form.witnessName || null,
+        witness_id_number: form.witnessIdNumber || null,
+        witness_phone: form.witnessPhone || null,
       })
       .select()
       .single();
@@ -99,11 +120,34 @@ export function LoansView({ loans, customers, vehicles, payments, loading, onCha
     if (data && form.vehicleId) {
       await supabase.from('vehicles').update({ status: 'financed' }).eq('id', form.vehicleId);
     }
+
+    if (data) {
+      const rows = balanceLines
+        .filter((l) => l.description.trim() && toNumber(l.amount) > 0)
+        .map((l, i) => ({
+          loan_id: data.id,
+          description: l.description,
+          amount: toNumber(l.amount),
+          due_date: l.dueDate || null,
+          sort_order: i,
+        }));
+      if (rows.length > 0) {
+        await supabase.from('balance_items').insert(rows);
+      }
+    }
+
     setSaving(false);
     setOpen(false);
     setForm(EMPTY);
+    setBalanceLines([{ ...EMPTY_LINE }]);
     onChanged();
   };
+
+  const updateLine = (i: number, patch: Partial<BalanceLineInput>) => {
+    setBalanceLines((lines) => lines.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+  };
+  const addLine = () => setBalanceLines((lines) => [...lines, { ...EMPTY_LINE }]);
+  const removeLine = (i: number) => setBalanceLines((lines) => lines.filter((_, idx) => idx !== i));
 
   return (
     <div className="space-y-6">
@@ -248,6 +292,68 @@ export function LoansView({ loans, customers, vehicles, payments, loading, onCha
                 </div>
               </div>
             </Card>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contractDate">Contract Date</Label>
+                <Input id="contractDate" type="date" value={form.contractDate} onChange={(e) => setForm({ ...form, contractDate: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="depositDate">Deposit Paid On</Label>
+                <Input id="depositDate" type="date" value={form.depositDate} onChange={(e) => setForm({ ...form, depositDate: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Balance Breakdown</Label>
+              <p className="text-xs text-muted-foreground">Lines shown on the printed agreement, e.g. "To be financed by Finseil Ltd", "To be paid on 19.08.2026".</p>
+              <div className="space-y-2">
+                {balanceLines.map((line, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-2">
+                    <Input
+                      placeholder="Description (e.g. To be financed by Finseil Ltd)"
+                      value={line.description}
+                      onChange={(e) => updateLine(i, { description: e.target.value })}
+                    />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Amount"
+                      className="w-32"
+                      value={line.amount}
+                      onChange={(e) => updateLine(i, { amount: e.target.value })}
+                    />
+                    <Input
+                      type="date"
+                      className="w-40"
+                      value={line.dueDate}
+                      onChange={(e) => updateLine(i, { dueDate: e.target.value })}
+                    />
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(i)} disabled={balanceLines.length === 1}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addLine}>
+                <Plus className="mr-1 h-3 w-3" /> Add line
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="witnessName">Witness Name</Label>
+                <Input id="witnessName" value={form.witnessName} onChange={(e) => setForm({ ...form, witnessName: e.target.value })} placeholder="Stephen Were" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="witnessIdNumber">Witness ID No</Label>
+                <Input id="witnessIdNumber" value={form.witnessIdNumber} onChange={(e) => setForm({ ...form, witnessIdNumber: e.target.value })} placeholder="28198771" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="witnessPhone">Witness Tel No</Label>
+                <Input id="witnessPhone" value={form.witnessPhone} onChange={(e) => setForm({ ...form, witnessPhone: e.target.value })} placeholder="0718 267 752" />
+              </div>
+            </div>
 
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
