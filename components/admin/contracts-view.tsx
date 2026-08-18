@@ -58,27 +58,59 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
 
   return (
     <div className="space-y-6">
-      {/* Inject Print CSS Styles */}
+      {/* Global CSS for Print Mode */}
       <style jsx global>{`
         @media print {
-          /* Remove browser headers/footers (time, date, title, URL) */
+          /* 1. Remove browser headers, footers, and margins */
           @page {
-            margin: 0;
-            size: auto;
+            margin: 10mm;
+            size: A4 portrait;
           }
+
           body {
             background-color: #ffffff !important;
-            padding: 12mm !important;
+            color: #000000 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            overflow: visible !important;
           }
-          /* Hide all UI elements outside the printable card */
-          header, nav, sidebar, .print\\:hidden {
+
+          /* 2. Hide all floating controls, hamburger icons, sidebars, and header elements */
+          button,
+          nav,
+          aside,
+          header,
+          .fixed,
+          .absolute,
+          .print\\:hidden {
             display: none !important;
+          }
+
+          /* 3. Prevent overlapping text and overflow clipping */
+          .space-y-6,
+          .max-w-3xl {
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+
+          .border-border\\/60 {
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            overflow: visible !important;
+          }
+
+          ol,
+          .grid {
+            page-break-inside: avoid;
           }
         }
       `}</style>
 
+      {/* Screen-Only Header & Controls */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Contracts</h1>
@@ -154,7 +186,7 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
           </div>
           <div className="mt-2 border-t-2 border-red-600" />
 
-          {/* Title */}
+          {/* Document Title */}
           <p className="mt-4 text-sm font-bold underline">
             MOTOR VEHICLE SALE AGREEMENT {formatDateDMY(loan.contract_date)}
           </p>
@@ -171,7 +203,7 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
             {specRow('ENGINE CAPACITY', vehicle?.engine_capacity)}
           </div>
 
-          {/* Buyer */}
+          {/* Buyer Details */}
           <div className="mt-3 space-y-0.5 text-sm">
             <p>
               <span className="font-semibold">- BUYER &#39;S NAME: {customer?.name?.toUpperCase() ?? ''}</span>
@@ -186,7 +218,7 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
             </p>
           </div>
 
-          {/* Deposit / Balance */}
+          {/* Deposit & Balance Schedule */}
           <div className="mt-3 space-y-1 text-sm">
             <p>
               <span className="font-semibold underline">DEPOSIT</span>
@@ -211,7 +243,7 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
             )}
           </div>
 
-          {/* Terms */}
+          {/* Terms & Conditions */}
           <ol className="mt-4 list-none space-y-1 text-[11px] leading-snug">
             {TERMS.map((t, i) => (
               <li key={i}>
@@ -237,7 +269,7 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
             </div>
           </div>
 
-          {/* Witness */}
+          {/* Witness Details */}
           <div className="mt-4 text-center text-sm">
             <p>
               WITNESS: {loan.witness_name?.toUpperCase() ?? ''} &nbsp; IDNO: {loan.witness_id_number ?? ''}
