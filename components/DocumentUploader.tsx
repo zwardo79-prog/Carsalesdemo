@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client'; // Adjust path to your Supabase client
+import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Upload, FileCheck, Loader2 } from 'lucide-react';
 
-type Props = {
+type DocumentUploaderProps = {
   customerId: string;
   docType: 'logbook' | 'id_document' | 'agreement';
   label: string;
@@ -13,7 +13,13 @@ type Props = {
   onUploadComplete: (url: string) => void;
 };
 
-export function DocumentUploader({ customerId, docType, label, currentUrl, onUploadComplete }: Props) {
+export function DocumentUploader({
+  customerId,
+  docType,
+  label,
+  currentUrl,
+  onUploadComplete,
+}: DocumentUploaderProps) {
   const [uploading, setUploading] = useState(false);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,11 +27,10 @@ export function DocumentUploader({ customerId, docType, label, currentUrl, onUpl
     if (!file) return;
 
     setUploading(true);
-    const supabase = createClient();
     const fileExt = file.name.split('.').pop();
     const filePath = `${customerId}/${docType}_${Date.now()}.${fileExt}`;
 
-    // 1. Upload file to Supabase Storage
+    // 1. Upload file to Supabase Storage bucket 'customer-docs'
     const { error: uploadError } = await supabase.storage
       .from('customer-docs')
       .upload(filePath, file, { upsert: true });
@@ -37,15 +42,13 @@ export function DocumentUploader({ customerId, docType, label, currentUrl, onUpl
     }
 
     // 2. Get Public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('customer-docs')
-      .getPublicUrl(filePath);
+    const { data } = supabase.storage.from('customer-docs').getPublicUrl(filePath);
 
     // 3. Update Customer Record in Database
     const columnName = `${docType}_url`;
     const { error: dbError } = await supabase
       .from('customers')
-      .update({ [columnName]: publicUrl })
+      .update({ [columnName]: data.publicUrl })
       .eq('id', customerId);
 
     setUploading(false);
@@ -53,7 +56,7 @@ export function DocumentUploader({ customerId, docType, label, currentUrl, onUpl
     if (dbError) {
       alert(`Database update failed: ${dbError.message}`);
     } else {
-      onUploadComplete(publicUrl);
+      onUploadComplete(data.publicUrl);
     }
   };
 
@@ -71,9 +74,9 @@ export function DocumentUploader({ customerId, docType, label, currentUrl, onUpl
             href={currentUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-xs text-blue-600 underline"
+            className="text-xs text-blue-600 underline hover:text-blue-800 flex items-center"
           >
-            <FileCheck className="h-4 w-4 inline mr-1" /> View
+            <FileCheck className="h-4 w-4 mr-1" /> View
           </a>
         )}
         <label className="cursor-pointer">
