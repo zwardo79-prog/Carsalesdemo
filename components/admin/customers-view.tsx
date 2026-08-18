@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Customer } from '@/lib/types';
+import { Customer, Loan } from '@/lib/types';
 import { supabase } from '@/lib/supabase/client';
-import { formatDate } from '@/lib/finance';
+import { formatDate, formatCurrency } from '@/lib/finance';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,12 +15,12 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import { Users, Plus, Pencil, Mail, Phone, MapPin, Search } from 'lucide-react';
+import { Users, Plus, Pencil, Mail, Phone, MapPin, Search, FileText, Printer } from 'lucide-react';
 
 type Props = {
   customers: Customer[];
+  loans?: Loan[];
   loading: boolean;
   onChanged: () => void;
 };
@@ -35,12 +35,16 @@ type FormState = {
 
 const EMPTY: FormState = { name: '', email: '', phone: '', address: '', id_number: '' };
 
-export function CustomersView({ customers, loading, onChanged }: Props) {
+export function CustomersView({ customers, loans = [], loading, onChanged }: Props) {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Customer | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState('');
+
+  // State for Customer Agreements Modal
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [agreementsOpen, setAgreementsOpen] = useState(false);
 
   const startAdd = () => {
     setEditing(null);
@@ -58,6 +62,11 @@ export function CustomersView({ customers, loading, onChanged }: Props) {
       id_number: c.id_number ?? '',
     });
     setOpen(true);
+  };
+
+  const openAgreements = (c: Customer) => {
+    setSelectedCustomer(c);
+    setAgreementsOpen(true);
   };
 
   const save = async (e: React.FormEvent) => {
@@ -84,6 +93,8 @@ export function CustomersView({ customers, loading, onChanged }: Props) {
     const q = search.toLowerCase();
     return !q || c.name.toLowerCase().includes(q) || (c.email ?? '').toLowerCase().includes(q) || (c.phone ?? '').includes(q);
   });
+
+  const customerLoans = loans.filter((l) => l.customer_id === selectedCustomer?.id);
 
   return (
     <div className="space-y-6">
@@ -122,32 +133,49 @@ export function CustomersView({ customers, loading, onChanged }: Props) {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((c) => (
-            <Card key={c.id} className="border-border/50 bg-card/50 p-5">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
-                    {c.name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
+            <Card key={c.id} className="flex flex-col justify-between border-border/50 bg-card/50 p-5">
+              <div>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
+                      {c.name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold leading-tight">{c.name}</h3>
+                      <p className="text-xs text-muted-foreground">Added {formatDate(c.created_at)}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold leading-tight">{c.name}</h3>
-                    <p className="text-xs text-muted-foreground">Added {formatDate(c.created_at)}</p>
-                  </div>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(c)}>
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(c)}>
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
+
+                <div className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+                  {c.email && <p className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary/60" /> {c.email}</p>}
+                  {c.phone && <p className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary/60" /> {c.phone}</p>}
+                  {c.address && <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary/60" /> {c.address}</p>}
+                  {c.id_number && <p className="flex items-center gap-2"><Badge variant="outline" className="text-[10px]">ID: {c.id_number}</Badge></p>}
+                </div>
               </div>
-              <div className="mt-4 space-y-1.5 text-sm text-muted-foreground">
-                {c.email && <p className="flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary/60" /> {c.email}</p>}
-                {c.phone && <p className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-primary/60" /> {c.phone}</p>}
-                {c.address && <p className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5 text-primary/60" /> {c.address}</p>}
-                {c.id_number && <p className="flex items-center gap-2"><Badge variant="outline" className="text-[10px]">ID: {c.id_number}</Badge></p>}
+
+              {/* ACTION BUTTON FOR AGREEMENTS */}
+              <div className="mt-5 border-t border-border/40 pt-3">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full text-xs" 
+                  onClick={() => openAgreements(c)}
+                >
+                  <FileText className="mr-1.5 h-3.5 w-3.5 text-primary" />
+                  View Agreements
+                </Button>
               </div>
             </Card>
           ))}
         </div>
       )}
 
+      {/* EDIT / ADD CUSTOMER DIALOG */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -181,6 +209,40 @@ export function CustomersView({ customers, loading, onChanged }: Props) {
               <Button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save'}</Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* CUSTOMER AGREEMENTS MODAL */}
+      <Dialog open={agreementsOpen} onOpenChange={setAgreementsOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Agreements - {selectedCustomer?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {customerLoans.length === 0 ? (
+              <p className="text-center text-sm text-muted-foreground py-6">
+                No active agreements or loans found for this customer.
+              </p>
+            ) : (
+              customerLoans.map((loan) => (
+                <div key={loan.id} className="flex items-center justify-between rounded-lg border border-border/50 bg-background/50 p-4">
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold">Loan #{loan.id.slice(0, 8)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Balance: <span className="font-medium text-foreground">{formatCurrency(Number(loan.remaining_balance))}</span>
+                    </p>
+                    <Badge variant="outline" className="text-[10px] capitalize">{loan.status}</Badge>
+                  </div>
+                  <Button size="sm" onClick={() => window.print()}>
+                    <Printer className="mr-1.5 h-3.5 w-3.5" /> Print Agreement
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAgreementsOpen(false)}>Close</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
