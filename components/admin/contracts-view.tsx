@@ -58,6 +58,27 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
 
   return (
     <div className="space-y-6">
+      {/* Inject Print CSS Styles */}
+      <style jsx global>{`
+        @media print {
+          /* Remove browser headers/footers (time, date, title, URL) */
+          @page {
+            margin: 0;
+            size: auto;
+          }
+          body {
+            background-color: #ffffff !important;
+            padding: 12mm !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          /* Hide all UI elements outside the printable card */
+          header, nav, sidebar, .print\\:hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Contracts</h1>
@@ -95,7 +116,7 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
           <p className="mt-1 text-sm text-muted-foreground">Choose a loan from the dropdown above.</p>
         </Card>
       ) : (
-        <Card className="mx-auto max-w-3xl border-border/60 bg-white p-8 text-black print:border-0 print:shadow-none">
+        <Card className="mx-auto max-w-3xl border-border/60 bg-white p-8 text-black print:border-0 print:p-0 print:shadow-none">
           {/* Letterhead */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
