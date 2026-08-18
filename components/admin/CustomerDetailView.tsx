@@ -16,7 +16,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData()
+    async function fetchData() {
       
       // Fetch Customer
       const { data: custData } = await supabase
