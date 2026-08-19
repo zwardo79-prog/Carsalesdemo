@@ -278,13 +278,13 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
                 </div>
               </div>
 
-              <div className="mt-6 flex flex-wrap items-baseline justify-center gap-x-8 gap-y-2 text-center text-xs print:text-sm text-black">
+              <div className="mt-6 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 text-xs print:text-sm text-black">
                 <p>WITNESS: {loan.witness_name?.toUpperCase() ?? ''}</p>
                 <p>IDNO: {loan.witness_id_number ?? ''}</p>
                 <p>TEL NO: {loan.witness_phone ?? ''}</p>
                 <div className="flex items-baseline gap-2">
                   <span>SIGN</span>
-                  <span className="inline-block w-32 border-b border-black print:w-40" />
+                  <span className="inline-block w-28 border-b border-black print:w-32" />
                 </div>
               </div>
 
