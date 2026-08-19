@@ -114,26 +114,27 @@ export function PaymentsView({ loans, customers, vehicles, payments, loading, on
               <Card key={l.id} className="border-border/50 bg-card/50 p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/15">
                       <CreditCard className="h-5 w-5 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold leading-tight">{customerName(l.customer_id)}</h3>
-                      <p className="text-xs text-muted-foreground">{vehicleLabel(l.vehicle_id)} · {formatCurrency(Number(l.monthly_payment))}/mo</p>
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold leading-tight">{customerName(l.customer_id)}</h3>
+                      <p className="truncate text-xs text-muted-foreground">{vehicleLabel(l.vehicle_id)} · {formatCurrency(Number(l.monthly_payment))}/mo</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
+                  <div className="flex flex-wrap items-center gap-4 sm:justify-end sm:gap-6">
+                    <div className="text-left sm:text-right">
                       <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Remaining</p>
                       <p className="text-lg font-bold">{formatCurrency(Number(l.remaining_balance))}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-left sm:text-right">
                       <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Paid</p>
                       <p className="text-lg font-bold text-primary">{formatCurrency(totalPaid)}</p>
                     </div>
                     <Button
                       variant="secondary"
                       size="sm"
+                      className="ml-auto sm:ml-0"
                       onClick={() => { setSelectedLoanId(l.id); setOpen(true); }}
                     >
                       <Plus className="mr-1 h-3.5 w-3.5" /> Payment
@@ -148,16 +149,16 @@ export function PaymentsView({ loans, customers, vehicles, payments, loading, on
                     </div>
                     <div className="space-y-2">
                       {pays.map((p) => (
-                        <div key={p.id} className="flex items-center justify-between rounded-lg border border-border/30 bg-background/30 px-3 py-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <TrendingDown className="h-3.5 w-3.5 text-primary" />
+                        <div key={p.id} className="flex flex-col gap-2 rounded-lg border border-border/30 bg-background/30 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <TrendingDown className="h-3.5 w-3.5 shrink-0 text-primary" />
                             <span className="font-medium text-primary">{formatCurrency(Number(p.amount))}</span>
                             <span className="text-muted-foreground">· {formatDate(p.payment_date)}</span>
                             {p.note && <Badge variant="outline" className="text-[10px]">{p.note}</Badge>}
                           </div>
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-between gap-3 sm:justify-end">
                             <span className="text-xs text-muted-foreground">Bal: {formatCurrency(Number(p.remaining_after))}</span>
-                            <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => onPrintReceipt(p.id)}>
+                            <Button variant="ghost" size="sm" className="h-7 shrink-0 px-2" onClick={() => onPrintReceipt(p.id)}>
                               <Printer className="mr-1 h-3.5 w-3.5" /> Receipt
                             </Button>
                           </div>
