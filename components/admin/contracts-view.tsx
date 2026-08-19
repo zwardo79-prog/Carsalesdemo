@@ -199,15 +199,15 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
               </div>
 
               {/* Buyer Details */}
-              <div className="mt-2 print:mt-3 space-y-1 text-xs print:text-sm text-black">
-                <p>
-                  <span className="font-semibold">- BUYER &#39;S NAME: {customer?.name?.toUpperCase() ?? ''}</span>
-                  <span className="ml-6">IDNO; {customer?.id_number ?? ''}</span>
-                </p>
-                <p className="pl-3">
-                  <span className="font-semibold">RESIDENCE: {customer?.address ?? ''}</span>
-                  <span className="ml-6">TEL NO:{customer?.phone ?? ''}</span>
-                </p>
+              <div className="mt-2 print:mt-3 space-y-1.5 text-xs print:text-sm text-black">
+                <div className="flex flex-wrap items-baseline gap-x-8 gap-y-1">
+                  <p className="font-semibold">- BUYER &#39;S NAME: {customer?.name?.toUpperCase() ?? ''}</p>
+                  <p className="font-semibold">IDNO; {customer?.id_number ?? ''}</p>
+                </div>
+                <div className="flex flex-wrap items-baseline gap-x-8 gap-y-1 pl-3">
+                  <p className="font-semibold">RESIDENCE: {customer?.address ?? ''}</p>
+                  <p className="font-semibold">TEL NO: {customer?.phone ?? ''}</p>
+                </div>
                 <p className="font-bold underline">
                   PURCHASE PRICE: KSH {Number(loan.vehicle_price).toLocaleString('en-US', { minimumFractionDigits: 2 })}/= ({amountInWords(loan.vehicle_price)})
                 </p>
@@ -266,11 +266,11 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
                 </div>
               </div>
 
-              <div className="mt-4 text-center text-xs print:text-sm text-black">
-                <p>
-                  WITNESS: {loan.witness_name?.toUpperCase() ?? ''} &nbsp; IDNO: {loan.witness_id_number ?? ''}
-                </p>
-                <p>TEL NO: {loan.witness_phone ?? ''} &nbsp; SIGN………………</p>
+              <div className="mt-4 flex flex-wrap items-baseline justify-center gap-x-8 gap-y-1 text-center text-xs print:text-sm text-black">
+                <p>WITNESS: {loan.witness_name?.toUpperCase() ?? ''}</p>
+                <p>IDNO: {loan.witness_id_number ?? ''}</p>
+                <p>TEL NO: {loan.witness_phone ?? ''}</p>
+                <p>SIGN………………</p>
               </div>
 
               <div className="mt-3 border-t-2 border-blue-800" />
