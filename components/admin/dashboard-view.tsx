@@ -80,12 +80,12 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
             onClick={c.onClick}
             className="relative overflow-hidden border-border/50 bg-card/50 p-5 cursor-pointer hover:border-border transition-colors"
           >
-            <div className="flex items-start justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">{c.label}</p>
-                <p className="mt-2 text-2xl font-bold">{c.value}</p>
+                <p className="mt-2 truncate text-2xl font-bold" title={String(c.value)}>{c.value}</p>
               </div>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${c.bg}`}>
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${c.bg}`}>
                 <c.icon className={`h-5 w-5 ${c.tint}`} />
               </div>
             </div>
