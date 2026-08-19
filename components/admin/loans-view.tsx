@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Customer, Vehicle, Loan, Payment, BalanceItem } from '@/lib/types';
 import { supabase } from '@/lib/supabase/client';
-import { calculateBalance, calculateMonthlyPayment, formatCurrency, formatDate, toNumber } from '@/lib/finance';
+import { calculateBalance, calculateMonthlyPayment, formatCurrency, formatCurrencyCompact, formatDate, toNumber } from '@/lib/finance';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,6 +91,10 @@ export function LoansView({ loans, customers, vehicles, payments, loading, onCha
 
   const availableVehicles = vehicles.filter((v) => v.status === 'available');
 
+  const totalPortfolioValue = loans.reduce((s, l) => s + Number(l.vehicle_price), 0);
+  const totalOutstanding = loans.reduce((s, l) => s + Number(l.remaining_balance), 0);
+  const totalPaidAcrossLoans = payments.reduce((s, p) => s + Number(p.amount), 0);
+
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -160,6 +164,29 @@ export function LoansView({ loans, customers, vehicles, payments, loading, onCha
           <Plus className="mr-2 h-4 w-4" /> New Loan
         </Button>
       </div>
+
+      {loans.length > 0 && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <Card className="border-border/50 bg-card/50 p-5">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Total Portfolio Value</p>
+            <p className="mt-2 truncate text-2xl font-bold" title={formatCurrency(totalPortfolioValue)}>
+              {formatCurrencyCompact(totalPortfolioValue)}
+            </p>
+          </Card>
+          <Card className="border-border/50 bg-card/50 p-5">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Total Outstanding</p>
+            <p className="mt-2 truncate text-2xl font-bold text-amber-400" title={formatCurrency(totalOutstanding)}>
+              {formatCurrencyCompact(totalOutstanding)}
+            </p>
+          </Card>
+          <Card className="border-border/50 bg-card/50 p-5">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground">Total Paid</p>
+            <p className="mt-2 truncate text-2xl font-bold text-primary" title={formatCurrency(totalPaidAcrossLoans)}>
+              {formatCurrencyCompact(totalPaidAcrossLoans)}
+            </p>
+          </Card>
+        </div>
+      )}
 
       {customers.length === 0 || availableVehicles.length === 0 ? (
         <Card className="border-border/50 bg-card/40 p-6 text-sm text-muted-foreground">

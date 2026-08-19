@@ -29,6 +29,23 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+/** Compact form for tight spaces, e.g. "KES 1.7M", "KES 2.5K", "KES 800". */
+export function formatCurrencyCompact(amount: number): string {
+  const abs = Math.abs(amount);
+  const sign = amount < 0 ? '-' : '';
+  let short: string;
+  if (abs >= 1_000_000_000) {
+    short = `${(abs / 1_000_000_000).toFixed(1).replace(/\.0$/, '')}B`;
+  } else if (abs >= 1_000_000) {
+    short = `${(abs / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  } else if (abs >= 1_000) {
+    short = `${(abs / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+  } else {
+    short = abs.toFixed(0);
+  }
+  return `KES ${sign}${short}`;
+}
+
 export function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-KE', {
     year: 'numeric',

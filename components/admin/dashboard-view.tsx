@@ -1,7 +1,7 @@
 'use client';
 
 import { DashboardStats, Customer, Vehicle, Loan, Payment } from '@/lib/types';
-import { formatCurrency, formatDate } from '@/lib/finance';
+import { formatCurrency, formatCurrencyCompact, formatDate } from '@/lib/finance';
 import { Users, Car, Landmark, Wallet, TrendingUp, ArrowRight } from 'lucide-react';
 import { View } from '@/components/admin/sidebar';
 import { Button } from '@/components/ui/button';
@@ -57,7 +57,8 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
     },
     { 
       label: 'Outstanding Balance', 
-      value: formatCurrency(stats?.outstandingBalance ?? 0), 
+      value: formatCurrencyCompact(stats?.outstandingBalance ?? 0), 
+      fullValue: formatCurrency(stats?.outstandingBalance ?? 0),
       icon: Wallet, 
       tint: 'text-primary', 
       bg: 'bg-primary/10',
@@ -83,7 +84,7 @@ export function DashboardView({ stats, loans, customers, vehicles, payments, loa
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="text-xs uppercase tracking-wide text-muted-foreground">{c.label}</p>
-                <p className="mt-2 truncate text-2xl font-bold" title={String(c.value)}>{c.value}</p>
+                <p className="mt-2 truncate text-2xl font-bold" title={c.fullValue ?? String(c.value)}>{c.value}</p>
               </div>
               <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${c.bg}`}>
                 <c.icon className={`h-5 w-5 ${c.tint}`} />
