@@ -3,10 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Customer } from '@/lib/types';
+import { supabase } from '@/lib/supabase/client';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, User, Phone, MapPin, ArrowUpRight } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Search, User, Phone, MapPin, ArrowUpRight, Plus } from 'lucide-react';
 
 type Props = {
   customers: Customer[];
@@ -14,8 +24,37 @@ type Props = {
   onChanged?: () => void;
 };
 
-export function CustomersView({ customers, loading }: Props) {
+type FormState = {
+  name: string;
+  phone: string;
+  email: string;
+  address: string;
+  idNumber: string;
+};
+
+const EMPTY: FormState = { name: '', phone: '', email: '', address: '', idNumber: '' };
+
+export function CustomersView({ customers, loading, onChanged }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState<FormState>(EMPTY);
+  const [saving, setSaving] = useState(false);
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    await supabase.from('customers').insert({
+      name: form.name,
+      phone: form.phone || null,
+      email: form.email || null,
+      address: form.address || null,
+      id_number: form.idNumber || null,
+    });
+    setSaving(false);
+    setOpen(false);
+    setForm(EMPTY);
+    onChanged?.();
+  };
 
   const filteredCustomers = customers.filter((c) =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -33,15 +72,20 @@ export function CustomersView({ customers, loading }: Props) {
             Click on any customer card to open their detail page and upload documents.
           </p>
         </div>
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search name, ID, or phone..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search name, ID, or phone..."
+              className="pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button onClick={() => setOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Add Customer
+          </Button>
         </div>
       </div>
 
@@ -118,6 +162,42 @@ export function CustomersView({ customers, loading }: Props) {
           })}
         </div>
       )}
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Customer</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={save} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name *</Label>
+              <Input id="name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Margaret Wambui Ng'anga" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="0726 935 722" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="idNumber">ID Number</Label>
+                <Input id="idNumber" value={form.idNumber} onChange={(e) => setForm({ ...form, idNumber: e.target.value })} placeholder="25361806" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="customer@email.com" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Residence</Label>
+              <Input id="address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="Nakuru - Naka" />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={saving || !form.name}>{saving ? 'Saving...' : 'Add Customer'}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

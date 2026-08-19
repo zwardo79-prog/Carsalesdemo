@@ -256,21 +256,36 @@ export function ContractsView({ loans, customers, vehicles, payments, balanceIte
               <div className="grid grid-cols-2 gap-8 text-xs print:text-sm">
                 <div>
                   <p className="font-bold text-red-600">SELLER: SAKINYA MOTORS</p>
-                  <p className="mt-6">SIGN………………………</p>
-                  <p className="mt-2">DATE:{formatDateDMY(loan.contract_date)}</p>
+                  <div className="mt-8 flex items-baseline gap-2">
+                    <span>SIGN</span>
+                    <span className="flex-1 border-b border-black" />
+                  </div>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span>DATE</span>
+                    <span>: {formatDateDMY(loan.contract_date)}</span>
+                  </div>
                 </div>
                 <div>
                   <p className="font-bold text-blue-800">BUYER: {customer?.name?.toUpperCase() ?? ''}</p>
-                  <p className="mt-6">SIGN……………</p>
-                  <p className="mt-2">DATE: {formatDateDMY(loan.contract_date)}</p>
+                  <div className="mt-8 flex items-baseline gap-2">
+                    <span>SIGN</span>
+                    <span className="flex-1 border-b border-black" />
+                  </div>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span>DATE</span>
+                    <span>: {formatDateDMY(loan.contract_date)}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-baseline justify-center gap-x-8 gap-y-1 text-center text-xs print:text-sm text-black">
+              <div className="mt-6 flex flex-wrap items-baseline justify-center gap-x-8 gap-y-2 text-center text-xs print:text-sm text-black">
                 <p>WITNESS: {loan.witness_name?.toUpperCase() ?? ''}</p>
                 <p>IDNO: {loan.witness_id_number ?? ''}</p>
                 <p>TEL NO: {loan.witness_phone ?? ''}</p>
-                <p>SIGN………………</p>
+                <div className="flex items-baseline gap-2">
+                  <span>SIGN</span>
+                  <span className="inline-block w-32 border-b border-black print:w-40" />
+                </div>
               </div>
 
               <div className="mt-3 border-t-2 border-blue-800" />
